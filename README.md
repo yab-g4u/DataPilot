@@ -22,7 +22,7 @@ A web-based application built with Streamlit for exploring and visualizing machi
 1.**Clone the repository:**
    
 bash
-   git clone <https://github.com/yab-g4u/ml-dashboard>
+   git clone <(https://github.com/yab-g4u/ml-dashboard.git)>
 2.**Install dependencies:**
    
 bash
