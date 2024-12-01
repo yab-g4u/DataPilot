@@ -2,32 +2,32 @@
 # Interactive Machine Learning Dashboard
 A web-based application built with Streamlit for exploring and visualizing machine learning models.  Upload your own datasets, select from various algorithms, and experiment with hyperparameters to build and evaluate models in real-time.
 ## Features
-• **Dataset Upload:** Upload CSV files for analysis.  The application handles missing data and performs basic data preprocessing.
-• **Model Selection:** Choose from several popular machine learning algorithms including:
+•**Dataset Upload:** Upload CSV files for analysis.  The application handles missing data and performs basic data preprocessing.
+•**Model Selection:** Choose from several popular machine learning algorithms including:
     * Logistic Regression
     * Decision Tree Classifier
     * Random Forest Classifier
     *(More models may be added in future updates)*
-• **Hyperparameter Tuning:** Adjust key hyperparameters for each model to optimize performance.
-• **Data Preprocessing:**  The app automatically handles missing values (numerical imputation with mean/median, categorical imputation with most frequent) and scales numerical features using StandardScaler.  Categorical features are one-hot encoded.
-• **Model Training & Evaluation:** Train the selected model on your data and get a detailed evaluation, including:
+•**Hyperparameter Tuning:** Adjust key hyperparameters for each model to optimize performance.
+•**Data Preprocessing:**  The app automatically handles missing values (numerical imputation with mean/median, categorical imputation with most frequent) and scales numerical features using StandardScaler.  Categorical features are one-hot encoded.
+•**Model Training & Evaluation:** Train the selected model on your data and get a detailed evaluation, including:
     * Confusion Matrix
     * Classification Report (Precision, Recall, F1-score)
     * Accuracy
-• **Real-time Visualization:**  View the results immediately using clear and informative visualizations.
-• **User-Friendly Interface:** Designed for ease of use, even for users with limited machine learning experience.
+•**Real-time Visualization:**  View the results immediately using clear and informative visualizations.
+•**User-Friendly Interface:** Designed for ease of use, even for users with limited machine learning experience.
 
 ## Getting Started
 
-1. **Clone the repository:**
+1.**Clone the repository:**
    
 bash
    git clone <https://github.com/yab-g4u/ml-dashboard>
-2. **Install dependencies:**
+2.**Install dependencies:**
    
 bash
    pip install -r requirements.txt
-3. **Run the app:**
+3.**Run the app:**
    
 bash
    streamlit run app.py
