@@ -1,4 +1,4 @@
-import streamlit as st 
+import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,30 +21,41 @@ uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
     try:
-        # Read the CSV file into a DataFrame
+        # Load the data and display the first few rows
         data = pd.read_csv(uploaded_file)
+
+        # Show the column names and the first few rows of the data
+        st.write("Columns in the dataset:", data.columns)
         st.write("Data Preview:")
         st.write(data.head())
+
+        # Reset index if there's an 'Index' column causing issues
+        data.reset_index(drop=True, inplace=True)
 
         # --- Data Visualization Section ---
         st.subheader("Data Visualization")
 
         # Select target column
         target_column = st.selectbox("Select Target Column", data.columns)
-        
+
         # Display histograms for numerical columns
         if st.checkbox("Show Histograms"):
             num_cols = data.select_dtypes(include=np.number).columns
             # Exclude target column from histogram display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
-            for col in num_cols:
-                plt.figure(figsize=(8, 6))
-                plt.hist(data[col], bins=20)
-                plt.xlabel(col)
-                plt.ylabel("Frequency")
-                plt.title(f"Histogram of {col}")
-                st.pyplot(plt)
+            
+            # Check if there are numerical columns left to plot
+            if len(num_cols) > 0:
+                for col in num_cols:
+                    plt.figure(figsize=(8, 6))
+                    plt.hist(data[col], bins=20)
+                    plt.xlabel(col)
+                    plt.ylabel("Frequency")
+                    plt.title(f"Histogram of {col}")
+                    st.pyplot(plt)
+            else:
+                st.write("No numerical columns available for histogram.")
 
         # Display boxplots for numerical columns
         if st.checkbox("Show Boxplots"):
@@ -52,10 +63,15 @@ if uploaded_file is not None:
             # Exclude target column from boxplot display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
-            plt.figure(figsize=(10, 6))
-            data.boxplot(column=num_cols)
-            plt.title("Boxplot of Numerical Features")
-            st.pyplot(plt)
+            
+            # Check if there are numerical columns left to plot
+            if len(num_cols) > 0:
+                plt.figure(figsize=(10, 6))
+                data.boxplot(column=num_cols)
+                plt.title("Boxplot of Numerical Features")
+                st.pyplot(plt)
+            else:
+                st.write("No numerical columns available for boxplot.")
 
         # Display pair plot for numerical columns
         if st.checkbox("Show Pair Plot"):
@@ -63,6 +79,8 @@ if uploaded_file is not None:
             # Exclude target column from pairplot display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
+            
+            # Check if there are enough numerical columns for a pairplot
             if len(num_cols) > 1:
                 plt.figure(figsize=(10, 8))
                 sns.pairplot(data[num_cols])
@@ -76,11 +94,16 @@ if uploaded_file is not None:
             # Exclude target column from correlation matrix display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
-            corr_matrix = data[num_cols].corr()
-            plt.figure(figsize=(10, 8))
-            sns.heatmap(corr_matrix, annot=True, cmap="coolwarm")
-            plt.title("Correlation Matrix of Numerical Features")
-            st.pyplot(plt)
+            
+            # Check if there are numerical columns left to plot
+            if len(num_cols) > 0:
+                corr_matrix = data[num_cols].corr()
+                plt.figure(figsize=(10, 8))
+                sns.heatmap(corr_matrix, annot=True, cmap="coolwarm")
+                plt.title("Correlation Matrix of Numerical Features")
+                st.pyplot(plt)
+            else:
+                st.write("No numerical columns available for correlation matrix.")
 
         # --- Machine Learning Section ---
         st.subheader("Machine Learning")
