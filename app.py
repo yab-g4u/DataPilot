@@ -40,37 +40,44 @@ if uploaded_file is not None:
         selected_model = st.selectbox("Select a model", list(model_options.keys()))
         model = model_options[selected_model]
 
-        # 3. Preprocessing Pipeline (Handles missing values, scaling, and encoding)
+        # 3. Preprocessing Pipeline 
         preprocessor = ColumnTransformer(
             transformers=[
                 ('num', Pipeline([
-                    ('imputer', SimpleImputer(strategy='mean')),  #Handle missing numerical values
-                    ('scaler', StandardScaler()) #Scale numerical features
+                    ('imputer', SimpleImputer(strategy='mean')),
+                    ('scaler', StandardScaler())
                 ]), numerical_cols),
                 ('cat', Pipeline([
-                    ('imputer', SimpleImputer(strategy='most_frequent')), #Handle missing categorical values
-                    ('onehot', OneHotEncoder(handle_unknown='ignore')) #One-hot encode categorical features
+                    ('imputer', SimpleImputer(strategy='most_frequent')),
+                    ('onehot', OneHotEncoder(handle_unknown='ignore'))
                 ]), categorical_cols)
             ])
 
-        # 4. Train/Test Split and Model Training
+        # 4. Hyperparameter Tuning
+        if selected_model == "Logistic Regression":
+            C = st.slider("Regularization Strength (C)", 0.01, 10.0, 1.0)
+            model.C = C
+        elif selected_model == "Decision Tree":
+            max_depth = st.slider("Max Depth", 1, 20, 5)
+            model.max_depth = max_depth
+        elif selected_model == "Random Forest":
+            n_estimators = st.slider("Number of Estimators", 10, 200, 100)
+            max_depth = st.slider("Max Depth", 1, 20, 5)
+            model.n_estimators = n_estimators
+            model.max_depth = max_depth
+
+        # 5. Train/Test Split and Model Training
         if st.button("Train Model"):
             try:
                 X = data.drop(target_column, axis=1)
                 y = data[target_column]
-                X_processed = preprocessor.fit_transform(X)  # Apply preprocessing
+                X_processed = preprocessor.fit_transform(X)
                 X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
-
-                #Hyperparameter Tuning (Example for RandomForest - Add more as needed)
-                if selected_model == "Random Forest":
-                    n_estimators = st.slider("Number of Estimators", 10, 200, 100)
-                    model.n_estimators = n_estimators
-                    
 
                 model.fit(X_train, y_train)
                 y_pred = model.predict(X_test)
 
-                # 5. Evaluation and Visualization
+                # 6. Evaluation and Visualization
                 cm = confusion_matrix(y_test, y_pred)
                 st.write("Confusion Matrix:")
                 plt.figure(figsize=(8, 6))
@@ -86,7 +93,7 @@ if uploaded_file is not None:
             except KeyError as e:
                 st.error(f"Error: Column '{e.args[0]}' not found in the dataset. Check your target column selection.")
             except ValueError as e:
-                st.error(f"Error: {e}.  Check your dataset for issues like inconsistent data types or missing values that cannot be handled by the preprocessing pipeline.")
+                st.error(f"Error: {e}. Check your dataset for issues like inconsistent data types or missing values.")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 
