@@ -1,6 +1,9 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
@@ -10,12 +13,10 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-st.title("Interactive Machine Learning Dashboard")
 
-# 1. Dataset Upload and Preprocessing
+st.title("Interactive Machine Learning Dashboard & Data Visualizer")
+
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
@@ -24,14 +25,61 @@ if uploaded_file is not None:
         st.write("Data Preview:")
         st.write(data.head())
 
-        # Identify numerical and categorical columns
-        numerical_cols = data.select_dtypes(include=np.number).columns
-        categorical_cols = data.select_dtypes(exclude=np.number).columns
+        # --- Data Visualization Section ---
+        st.subheader("Data Visualization")
+        if st.checkbox("Show Histograms"):
+            num_cols = data.select_dtypes(include=np.number).columns
+            #Exclude target column from histogram display
+            target_column = st.selectbox("Select Target Column", data.columns)
+            if target_column in num_cols:
+                num_cols = num_cols.drop(target_column)
+            for col in num_cols:
+                plt.figure(figsize=(8, 6))
+                plt.hist(data[col], bins=20)
+                plt.xlabel(col)
+                plt.ylabel("Frequency")
+                plt.title(f"Histogram of {col}")
+                st.pyplot(plt)
 
-        #Target column selection
-        target_column = st.selectbox("Select Target Column", data.columns)
+        if st.checkbox("Show Boxplots"):
+            num_cols = data.select_dtypes(include=np.number).columns
+            #Exclude target column from boxplot display
+            target_column = st.selectbox("Select Target Column", data.columns)
+            if target_column in num_cols:
+                num_cols = num_cols.drop(target_column)
+            plt.figure(figsize=(10, 6))
+            data.boxplot(column=num_cols)
+            plt.title("Boxplot of Numerical Features")
+            st.pyplot(plt)
 
-        # 2. Model Selection
+        if st.checkbox("Show Pair Plot"):
+            num_cols = data.select_dtypes(include=np.number).columns
+            #Exclude target column from pairplot display
+            target_column = st.selectbox("Select Target Column", data.columns)
+            if target_column in num_cols:
+                num_cols = num_cols.drop(target_column)
+            if len(num_cols) > 1:
+                plt.figure(figsize=(10, 8))
+                sns.pairplot(data[num_cols])
+                st.pyplot(plt)
+            else:
+                st.write("Not enough numerical columns for pair plot.")
+
+        if st.checkbox("Show Correlation Matrix"):
+            num_cols = data.select_dtypes(include=np.number).columns
+            #Exclude target column from correlation matrix display
+            target_column = st.selectbox("Select Target Column", data.columns)
+            if target_column in num_cols:
+                num_cols = num_cols.drop(target_column)
+            corr_matrix = data[num_cols].corr()
+            plt.figure(figsize=(10, 8))
+            sns.heatmap(corr_matrix, annot=True, cmap="coolwarm")
+            plt.title("Correlation Matrix of Numerical Features")
+            st.pyplot(plt)
+
+
+        # --- Machine Learning Section ---
+        st.subheader("Machine Learning")
         model_options = {
             "Logistic Regression": LogisticRegression(),
             "Decision Tree": DecisionTreeClassifier(),
@@ -40,20 +88,18 @@ if uploaded_file is not None:
         selected_model = st.selectbox("Select a model", list(model_options.keys()))
         model = model_options[selected_model]
 
-        # 3. Preprocessing Pipeline 
         preprocessor = ColumnTransformer(
             transformers=[
                 ('num', Pipeline([
                     ('imputer', SimpleImputer(strategy='mean')),
                     ('scaler', StandardScaler())
-                ]), numerical_cols),
+                ]), data.select_dtypes(include=np.number).columns),
                 ('cat', Pipeline([
                     ('imputer', SimpleImputer(strategy='most_frequent')),
                     ('onehot', OneHotEncoder(handle_unknown='ignore'))
-                ]), categorical_cols)
+                ]), data.select_dtypes(exclude=np.number).columns)
             ])
 
-        # 4. Hyperparameter Tuning
         if selected_model == "Logistic Regression":
             C = st.slider("Regularization Strength (C)", 0.01, 10.0, 1.0)
             model.C = C
@@ -66,7 +112,6 @@ if uploaded_file is not None:
             model.n_estimators = n_estimators
             model.max_depth = max_depth
 
-        # 5. Train/Test Split and Model Training
         if st.button("Train Model"):
             try:
                 X = data.drop(target_column, axis=1)
@@ -77,7 +122,6 @@ if uploaded_file is not None:
                 model.fit(X_train, y_train)
                 y_pred = model.predict(X_test)
 
-                # 6. Evaluation and Visualization
                 cm = confusion_matrix(y_test, y_pred)
                 st.write("Confusion Matrix:")
                 plt.figure(figsize=(8, 6))
@@ -90,12 +134,11 @@ if uploaded_file is not None:
                 st.write(classification_report(y_test, y_pred))
                 st.write(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
 
-            except KeyError as e:
-                st.error(f"Error: Column '{e.args[0]}' not found in the dataset. Check your target column selection.")
-            except ValueError as e:
-                st.error(f"Error: {e}. Check your dataset for issues like inconsistent data types or missing values.")
+            except (KeyError, ValueError) as e:
+                st.error(f"Error: {e}")
             except Exception as e:
-                st.error(f"An error occurred: {e}")
+                st.error(f"An unexpected error occurred: {e}")
 
     except Exception as e:
         st.error(f"An error occurred while loading the dataset: {e}")
+
