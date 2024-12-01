@@ -50,6 +50,10 @@ This will launch the application in your web browser.
 4. **Adjust Hyperparameters:**  For some models, you can adjust hyperparameters using the provided sliders or input fields.
 5. **Train the model:** Click the "Train Model" button.  This will preprocess your data, train the model, and display the evaluation metrics and visualizations.
 
+## Try the Interactive Dashboard!
+
+   Click the link below to access a live, interactive version of the machine learning dashboard:
+   https://ml-dashboard-egwwhfpax5cvufphgsahgd.streamlit.app/
 
 ## Contributing
 
