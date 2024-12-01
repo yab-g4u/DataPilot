@@ -1,5 +1,4 @@
-
-import streamlit as st
+import streamlit as st 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,23 +13,29 @@ from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
 
-
+# Title for the app
 st.title("Interactive Machine Learning Dashboard & Data Visualizer")
 
+# File upload
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
     try:
+        # Read the CSV file into a DataFrame
         data = pd.read_csv(uploaded_file)
         st.write("Data Preview:")
         st.write(data.head())
 
         # --- Data Visualization Section ---
         st.subheader("Data Visualization")
+
+        # Select target column
+        target_column = st.selectbox("Select Target Column", data.columns)
+        
+        # Display histograms for numerical columns
         if st.checkbox("Show Histograms"):
             num_cols = data.select_dtypes(include=np.number).columns
-            #Exclude target column from histogram display
-            target_column = st.selectbox("Select Target Column", data.columns)
+            # Exclude target column from histogram display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
             for col in num_cols:
@@ -41,10 +46,10 @@ if uploaded_file is not None:
                 plt.title(f"Histogram of {col}")
                 st.pyplot(plt)
 
+        # Display boxplots for numerical columns
         if st.checkbox("Show Boxplots"):
             num_cols = data.select_dtypes(include=np.number).columns
-            #Exclude target column from boxplot display
-            target_column = st.selectbox("Select Target Column", data.columns)
+            # Exclude target column from boxplot display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
             plt.figure(figsize=(10, 6))
@@ -52,10 +57,10 @@ if uploaded_file is not None:
             plt.title("Boxplot of Numerical Features")
             st.pyplot(plt)
 
+        # Display pair plot for numerical columns
         if st.checkbox("Show Pair Plot"):
             num_cols = data.select_dtypes(include=np.number).columns
-            #Exclude target column from pairplot display
-            target_column = st.selectbox("Select Target Column", data.columns)
+            # Exclude target column from pairplot display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
             if len(num_cols) > 1:
@@ -65,10 +70,10 @@ if uploaded_file is not None:
             else:
                 st.write("Not enough numerical columns for pair plot.")
 
+        # Display correlation matrix
         if st.checkbox("Show Correlation Matrix"):
             num_cols = data.select_dtypes(include=np.number).columns
-            #Exclude target column from correlation matrix display
-            target_column = st.selectbox("Select Target Column", data.columns)
+            # Exclude target column from correlation matrix display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
             corr_matrix = data[num_cols].corr()
@@ -77,9 +82,10 @@ if uploaded_file is not None:
             plt.title("Correlation Matrix of Numerical Features")
             st.pyplot(plt)
 
-
         # --- Machine Learning Section ---
         st.subheader("Machine Learning")
+        
+        # Model selection
         model_options = {
             "Logistic Regression": LogisticRegression(),
             "Decision Tree": DecisionTreeClassifier(),
@@ -88,6 +94,7 @@ if uploaded_file is not None:
         selected_model = st.selectbox("Select a model", list(model_options.keys()))
         model = model_options[selected_model]
 
+        # Data preprocessing pipeline
         preprocessor = ColumnTransformer(
             transformers=[
                 ('num', Pipeline([
@@ -100,6 +107,7 @@ if uploaded_file is not None:
                 ]), data.select_dtypes(exclude=np.number).columns)
             ])
 
+        # Hyperparameter tuning based on selected model
         if selected_model == "Logistic Regression":
             C = st.slider("Regularization Strength (C)", 0.01, 10.0, 1.0)
             model.C = C
@@ -112,20 +120,28 @@ if uploaded_file is not None:
             model.n_estimators = n_estimators
             model.max_depth = max_depth
 
+        # Train the selected model
         if st.button("Train Model"):
             try:
+                # Split data into features and target
                 X = data.drop(target_column, axis=1)
                 y = data[target_column]
+
+                # Preprocess the features
                 X_processed = preprocessor.fit_transform(X)
+
+                # Split into training and testing sets
                 X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
 
+                # Train the model
                 model.fit(X_train, y_train)
                 y_pred = model.predict(X_test)
 
+                # Model evaluation
                 cm = confusion_matrix(y_test, y_pred)
                 st.write("Confusion Matrix:")
                 plt.figure(figsize=(8, 6))
-                sns.heatmap(cm, annot=True, fmt="d")
+                sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
                 plt.xlabel("Predicted")
                 plt.ylabel("Actual")
                 st.pyplot(plt)
@@ -141,4 +157,3 @@ if uploaded_file is not None:
 
     except Exception as e:
         st.error(f"An error occurred while loading the dataset: {e}")
-
