@@ -109,7 +109,7 @@ This will open the dashboard in your default web browser.
   - Regularization strength for Logistic Regression
   - Tree depth for Decision Trees
   - Number of estimators for Random Forest
-- Use the provided sliders or input fields to adjust these settings.
+- Use the provided sliders or input fields to adjust these settings
 
 ### 5. **Train the Model**
 - Click "Train Model" to start the training process. The app will preprocess your data, train the selected model, and provide evaluation metrics and visualizations in real-time.
