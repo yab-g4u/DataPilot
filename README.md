@@ -7,7 +7,7 @@ Welcome to the **ML Dashboard**! This is a web-based, interactive platform built
 ## Features
 
 ### **1. Dataset Upload**
-- Easily upload your own **CSV files** for analysis.
+- Easily upload your own **CSV files** for analysis
 - The app handles missing data with intelligent preprocessing:
   - Numerical data is imputed with **mean** or **median** values.
   - Categorical data is imputed using the **most frequent** value.
