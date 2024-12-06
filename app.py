@@ -7,11 +7,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, roc_curve, auc, precision_recall_curve
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
 
 # Title for the app
 st.title("DataPilot - Interactive Machine Learning Dashboard & Data Visualizer")
@@ -41,11 +41,8 @@ if uploaded_file is not None:
         # Display histograms for numerical columns
         if st.checkbox("Show Histograms"):
             num_cols = data.select_dtypes(include=np.number).columns
-            # Exclude target column from histogram display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
-
-            # Check if there are numerical columns left to plot
             if len(num_cols) > 0:
                 for col in num_cols:
                     plt.figure(figsize=(8, 6))
@@ -60,11 +57,8 @@ if uploaded_file is not None:
         # Display boxplots for numerical columns
         if st.checkbox("Show Boxplots"):
             num_cols = data.select_dtypes(include=np.number).columns
-            # Exclude the target column
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
-
-            # Check if there are numerical columns left to plot
             if len(num_cols) > 0:
                 for col in num_cols:
                     plt.figure(figsize=(8, 6))
@@ -74,28 +68,11 @@ if uploaded_file is not None:
             else:
                 st.write("No numerical columns available for boxplot.")
 
-        # Display pair plot for numerical columns
-        if st.checkbox("Show Pair Plot"):
-            num_cols = data.select_dtypes(include=np.number).columns
-            # Exclude target column from pairplot display
-            if target_column in num_cols:
-                num_cols = num_cols.drop(target_column)
-
-            # Check if there are enough numerical columns for a pairplot
-            if len(num_cols) > 1:
-                sns.pairplot(data[num_cols])
-                st.pyplot()
-            else:
-                st.write("Not enough numerical columns for pair plot.")
-
         # Display correlation matrix
         if st.checkbox("Show Correlation Matrix"):
             num_cols = data.select_dtypes(include=np.number).columns
-            # Exclude target column from correlation matrix display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
-
-            # Check if there are numerical columns left to plot
             if len(num_cols) > 0:
                 corr_matrix = data[num_cols].corr()
                 plt.figure(figsize=(10, 8))
@@ -115,33 +92,50 @@ if uploaded_file is not None:
         selected_model = st.selectbox("Select a model", list(model_options.keys()))
         model = model_options[selected_model]
 
-        # Data preprocessing pipeline
-        preprocessor = ColumnTransformer(
-            transformers=[
-                ('num', Pipeline([
-                    ('imputer', SimpleImputer(strategy='mean')),
-                    ('scaler', StandardScaler())
-                ]), data.select_dtypes(include=np.number).columns),
-                ('cat', Pipeline([
-                    ('imputer', SimpleImputer(strategy='most_frequent')),
-                    ('onehot', OneHotEncoder(handle_unknown='ignore'))
-                ]), data.select_dtypes(exclude=np.number).columns)
-            ])
+        # Hyperparameter tuning based on selected model
+        if selected_model == "Logistic Regression":
+            C = st.slider("Regularization Strength (C)", 0.01, 10.0, 1.0)
+            model.C = C
+        elif selected_model == "Decision Tree":
+            max_depth = st.slider("Max Depth", 1, 20, 5)
+            model.max_depth = max_depth
+        elif selected_model == "Random Forest":
+            n_estimators = st.slider("Number of Estimators", 10, 200, 100)
+            max_depth = st.slider("Max Depth", 1, 20, 5)
+            model.n_estimators = n_estimators
+            model.max_depth = max_depth
 
         # Train the selected model
         if st.button("Train Model"):
             try:
-                # Split data into features and target
+                # Split data into features (X) and target (y)
                 X = data.drop(target_column, axis=1)
                 y = data[target_column]
 
-                # Preprocess the features
+                # Re-identify numerical and categorical columns
+                num_cols = X.select_dtypes(include=np.number).columns
+                cat_cols = X.select_dtypes(exclude=np.number).columns
+
+                # Define preprocessor
+                preprocessor = ColumnTransformer(
+                    transformers=[
+                        ('num', Pipeline([
+                            ('imputer', SimpleImputer(strategy='mean')),
+                            ('scaler', StandardScaler())
+                        ]), num_cols),
+                        ('cat', Pipeline([
+                            ('imputer', SimpleImputer(strategy='most_frequent')),
+                            ('onehot', OneHotEncoder(handle_unknown='ignore'))
+                        ]), cat_cols)
+                    ])
+
+                # Preprocess features
                 X_processed = preprocessor.fit_transform(X)
 
-                # Split into training and testing sets
+                # Train-test split
                 X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
 
-                # Train the model
+                # Train model
                 model.fit(X_train, y_train)
                 y_pred = model.predict(X_test)
 
@@ -158,22 +152,8 @@ if uploaded_file is not None:
                 st.write(classification_report(y_test, y_pred))
                 st.write(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
 
-                # ROC Curve
-                if st.checkbox("Show ROC Curve"):
-                    if hasattr(model, "predict_proba"):
-                        fpr, tpr, thresholds = roc_curve(y_test, model.predict_proba(X_test)[:, 1])
-                        roc_auc = auc(fpr, tpr)
-                        plt.figure(figsize=(8, 6))
-                        plt.plot(fpr, tpr, color="blue", lw=2, label="ROC curve (area = %0.2f)" % roc_auc)
-                        plt.plot([0, 1], [0, 1], color="gray", lw=2, linestyle="--")
-                        plt.xlabel("False Positive Rate")
-                        plt.ylabel("True Positive Rate")
-                        plt.title("Receiver Operating Characteristic (ROC) Curve")
-                        plt.legend(loc="lower right")
-                        st.pyplot(plt)
-
             except Exception as e:
                 st.error(f"An unexpected error occurred: {e}")
 
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"Error loading file: {e}")
