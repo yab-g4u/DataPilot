@@ -11,8 +11,9 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 import joblib
-import io
 
 # Dark Mode Styling (Custom CSS)
 st.markdown(
@@ -81,6 +82,19 @@ if uploaded_file is not None:
     # Model selection
     model_choice = st.sidebar.selectbox("Select Model", ["Random Forest", "Logistic Regression", "Decision Tree"])
 
+    # Hyperparameter optimization for each model
+    hyperparameter_optimization = False
+    if model_choice == "Logistic Regression":
+        regularization_strength = st.sidebar.slider("Regularization Strength", 0.01, 1.0, 0.1)
+        hyperparameter_optimization = True
+    elif model_choice == "Decision Tree":
+        max_depth = st.sidebar.slider("Maximum Depth", 1, 20, 5)
+        hyperparameter_optimization = True
+    elif model_choice == "Random Forest":
+        n_estimators = st.sidebar.slider("Number of Estimators", 10, 200, 100)
+        max_depth = st.sidebar.slider("Maximum Depth", 1, 20, 5)
+        hyperparameter_optimization = True
+
     # Button to trigger model training
     if st.button("Train Model"):
         # Split data into features (X) and target (y)
@@ -106,13 +120,11 @@ if uploaded_file is not None:
 
         # Choose model based on user selection
         if model_choice == "Random Forest":
-            model = RandomForestClassifier()
+            model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
         elif model_choice == "Logistic Regression":
-            from sklearn.linear_model import LogisticRegression
-            model = LogisticRegression()
+            model = LogisticRegression(C=regularization_strength)
         elif model_choice == "Decision Tree":
-            from sklearn.tree import DecisionTreeClassifier
-            model = DecisionTreeClassifier()
+            model = DecisionTreeClassifier(max_depth=max_depth)
 
         # Train-test split
         X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
@@ -145,3 +157,29 @@ if uploaded_file is not None:
                 file_name=model_filename,
                 mime="application/octet-stream"
             )
+
+        # Visualizations (Histograms, Boxplots, and Correlation Matrix)
+        st.subheader("Data Visualizations")
+
+        # Histogram for numerical features
+        st.write("### Histograms of Numerical Features")
+        for col in num_cols:
+            st.write(f"#### {col}")
+            fig, ax = plt.subplots(figsize=(8, 6))
+            sns.histplot(data[col], kde=True, ax=ax)
+            st.pyplot(fig)
+
+        # Boxplot to detect outliers
+        st.write("### Boxplots to Identify Outliers")
+        for col in num_cols:
+            st.write(f"#### {col}")
+            fig, ax = plt.subplots(figsize=(8, 6))
+            sns.boxplot(x=data[col], ax=ax)
+            st.pyplot(fig)
+
+        # Correlation matrix
+        st.write("### Correlation Matrix")
+        corr_matrix = data[num_cols].corr()
+        fig, ax = plt.subplots(figsize=(10, 8))
+        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
+        st.pyplot(fig)
