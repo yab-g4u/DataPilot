@@ -1,4 +1,4 @@
-# ML Dashboard - Interactive Machine Learning Platform
+# DataPilot - Interactive Machine Learning Platform
 
 Welcome to the **ML Dashboard**! This is a web-based, interactive platform built with **Streamlit** that allows users to explore, visualize, and experiment with machine learning models in real-time. Whether you are a beginner or an expert in machine learning, this tool makes it easy to upload your dataset, select from a variety of models, fine-tune hyperparameters, and evaluate the performance of your model with just a few clicks.
 
