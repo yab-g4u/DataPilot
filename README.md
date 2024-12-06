@@ -120,7 +120,7 @@ This will open the dashboard in your default web browser.
 
 You can also explore the interactive version of the dashboard live by clicking the link below:
 
-[Try the ML Dashboard Live!](https://ml-dashboard-egwwhfpax5cvufphgsahgd.streamlit.app/)
+[Try the Data Pilot Live!](https://ml-dashboard-egwwhfpax5cvufphgsahgd.streamlit.app/)
 
 ---
 
