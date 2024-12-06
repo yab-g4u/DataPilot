@@ -14,7 +14,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
 
 # Title for the app
-st.title("Interactive Machine Learning Dashboard & Data Visualizer")
+st.title("Data pilot - Interactive Machine Learning Dashboard & Data Visualizer")
 
 # File upload
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
