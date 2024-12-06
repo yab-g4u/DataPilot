@@ -3,17 +3,16 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler, RobustScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, roc_curve, auc, precision_recall_curve
 import shap
-import joblib
 
 # Title for the app
 st.title("DataPilot - Interactive Machine Learning Dashboard & Data Visualizer")
@@ -26,12 +25,10 @@ if uploaded_file is not None:
         # Load the data and display the first few rows
         data = pd.read_csv(uploaded_file)
 
-        # Show the column names and the first few rows of the data
         st.write("Columns in the dataset:", data.columns)
         st.write("Data Preview:")
         st.write(data.head())
 
-        # Reset index if there's an 'Index' column causing issues
         data.reset_index(drop=True, inplace=True)
 
         # --- Data Visualization Section ---
@@ -43,11 +40,9 @@ if uploaded_file is not None:
         # Display histograms for numerical columns
         if st.checkbox("Show Histograms"):
             num_cols = data.select_dtypes(include=np.number).columns
-            # Exclude target column from histogram display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
             
-            # Check if there are numerical columns left to plot
             if len(num_cols) > 0:
                 for col in num_cols:
                     plt.figure(figsize=(8, 6))
@@ -62,11 +57,9 @@ if uploaded_file is not None:
         # Display boxplots for numerical columns
         if st.checkbox("Show Boxplots"):
             num_cols = data.select_dtypes(include=np.number).columns
-            # Exclude target column from boxplot display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
             
-            # Check if there are numerical columns left to plot
             if len(num_cols) > 0:
                 plt.figure(figsize=(10, 6))
                 data.boxplot(column=num_cols)
@@ -75,29 +68,12 @@ if uploaded_file is not None:
             else:
                 st.write("No numerical columns available for boxplot.")
 
-        # Display pair plot for numerical columns
-        if st.checkbox("Show Pair Plot"):
-            num_cols = data.select_dtypes(include=np.number).columns
-            # Exclude target column from pairplot display
-            if target_column in num_cols:
-                num_cols = num_cols.drop(target_column)
-            
-            # Check if there are enough numerical columns for a pairplot
-            if len(num_cols) > 1:
-                plt.figure(figsize=(10, 8))
-                sns.pairplot(data[num_cols])
-                st.pyplot(plt)
-            else:
-                st.write("Not enough numerical columns for pair plot.")
-
         # Display correlation matrix
         if st.checkbox("Show Correlation Matrix"):
             num_cols = data.select_dtypes(include=np.number).columns
-            # Exclude target column from correlation matrix display
             if target_column in num_cols:
                 num_cols = num_cols.drop(target_column)
             
-            # Check if there are numerical columns left to plot
             if len(num_cols) > 0:
                 corr_matrix = data[num_cols].corr()
                 plt.figure(figsize=(10, 8))
@@ -119,18 +95,18 @@ if uploaded_file is not None:
 
         # Data preprocessing pipeline
         preprocessor = ColumnTransformer(
-            transformers=[ 
-                ('num', Pipeline([ 
+            transformers=[
+                ('num', Pipeline([
                     ('imputer', SimpleImputer(strategy='mean')),
                     ('scaler', StandardScaler())
                 ]), data.select_dtypes(include=np.number).columns),
-                ('cat', Pipeline([ 
+                ('cat', Pipeline([
                     ('imputer', SimpleImputer(strategy='most_frequent')),
                     ('onehot', OneHotEncoder(handle_unknown='ignore'))
                 ]), data.select_dtypes(exclude=np.number).columns)
             ])
 
-        # Hyperparameter tuning based on selected model
+        # Hyperparameter tuning sliders
         if selected_model == "Logistic Regression":
             C = st.slider("Regularization Strength (C)", 0.01, 10.0, 1.0)
             model.C = C
@@ -196,40 +172,30 @@ if uploaded_file is not None:
                     plt.title("Precision-Recall Curve")
                     st.pyplot(plt)
 
-                # SHAP feature importance
-                if st.button("SHAP Feature Importance"):
-                    explainer = shap.TreeExplainer(model)
-                    shap_values = explainer.shap_values(X_test)
-                    shap.summary_plot(shap_values, X_test)
-                    st.pyplot(plt)
-
             except (KeyError, ValueError) as e:
                 st.error(f"Error: {e}")
             except Exception as e:
                 st.error(f"An unexpected error occurred: {e}")
-
-        # --- Model Comparison ---
-        if st.button("Compare Models"):
-            models = [LogisticRegression(), DecisionTreeClassifier(), RandomForestClassifier()]
-            results = {}
-
-            for model in models:
-                model_name = model.__class__.__name__
-                model.fit(X_train, y_train)
-                y_pred = model.predict(X_test)
-
-                # Store metrics
-                accuracy = accuracy_score(y_test, y_pred)
-                results[model_name] = accuracy
-
-            # Show comparison results
-            st.write("Model Comparison Results:")
-            comparison_df = pd.DataFrame(results.items(), columns=["Model", "Accuracy"])
-            st.write(comparison_df)
 
         # --- Hyperparameter Optimization with GridSearchCV ---
         if st.button("Optimize Hyperparameters"):
             param_grid = {
                 "Logistic Regression": {"C": [0.01, 0.1, 1, 10]},
                 "Decision Tree": {"max_depth": [3, 5, 10, None]},
-                "Random Forest": {"n_estimators": [50, 100, 200], "max_depth":
+                "Random Forest": {"n_estimators": [50, 100, 200], "max_depth": [None, 5, 10, 20]}
+            }
+
+            selected_model_params = param_grid[selected_model]
+            grid_search = GridSearchCV(model, selected_model_params, cv=5, scoring='accuracy')
+
+            grid_search.fit(X_train, y_train)
+
+            st.write(f"Best Parameters: {grid_search.best_params_}")
+            st.write(f"Best Cross-Validation Accuracy: {grid_search.best_score_:.2f}")
+
+            best_model = grid_search.best_estimator_
+            y_pred_best = best_model.predict(X_test)
+            st.write(f"Test Accuracy: {accuracy_score(y_test, y_pred_best):.2f}")
+
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")
