@@ -11,11 +11,21 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
+import joblib
+import io
 
-# Title and header
+# Dark Mode Styling (Custom CSS)
 st.markdown(
     """
     <style>
+        body {
+            background-color: #2e2e2e;
+            color: white;
+        }
+        .sidebar .sidebar-content {
+            background-color: #333;
+            color: white;
+        }
         .header {
             font-size: 36px;
             color: #4CAF50;
@@ -25,8 +35,21 @@ st.markdown(
         }
         .subheader {
             font-size: 20px;
-            color: #555555;
+            color: #aaa;
             text-align: center;
+        }
+        .stButton>button {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        .stSelectbox>div>div>input {
+            background-color: #444;
+            color: white;
+        }
+        .stCheckbox>div>div>input {
+            background-color: #444;
+            color: white;
         }
     </style>
     """,
@@ -109,3 +132,16 @@ if uploaded_file is not None:
         st.write("Classification Report:")
         st.write(classification_report(y_test, y_pred))
         st.write(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+
+        # Save the trained model
+        model_filename = "trained_model.pkl"
+        joblib.dump(model, model_filename)
+
+        # Provide a download link for the trained model
+        with open(model_filename, "rb") as model_file:
+            st.download_button(
+                label="Download Trained Model",
+                data=model_file,
+                file_name=model_filename,
+                mime="application/octet-stream"
+            )
