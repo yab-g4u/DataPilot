@@ -3,18 +3,20 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler, RobustScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, roc_curve, auc, precision_recall_curve
+import shap
+import joblib
 
 # Title for the app
-st.title("Data pilot - Interactive Machine Learning Dashboard & Data Visualizer")
+st.title("DataPilot - Interactive Machine Learning Dashboard & Data Visualizer")
 
 # File upload
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
@@ -102,12 +104,10 @@ if uploaded_file is not None:
                 sns.heatmap(corr_matrix, annot=True, cmap="coolwarm")
                 plt.title("Correlation Matrix of Numerical Features")
                 st.pyplot(plt)
-            else:
-                st.write("No numerical columns available for correlation matrix.")
 
         # --- Machine Learning Section ---
         st.subheader("Machine Learning")
-        
+
         # Model selection
         model_options = {
             "Logistic Regression": LogisticRegression(),
@@ -119,12 +119,12 @@ if uploaded_file is not None:
 
         # Data preprocessing pipeline
         preprocessor = ColumnTransformer(
-            transformers=[
-                ('num', Pipeline([
+            transformers=[ 
+                ('num', Pipeline([ 
                     ('imputer', SimpleImputer(strategy='mean')),
                     ('scaler', StandardScaler())
                 ]), data.select_dtypes(include=np.number).columns),
-                ('cat', Pipeline([
+                ('cat', Pipeline([ 
                     ('imputer', SimpleImputer(strategy='most_frequent')),
                     ('onehot', OneHotEncoder(handle_unknown='ignore'))
                 ]), data.select_dtypes(exclude=np.number).columns)
@@ -173,13 +173,63 @@ if uploaded_file is not None:
                 st.write(classification_report(y_test, y_pred))
                 st.write(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
 
+                # ROC Curve
+                if st.checkbox("Show ROC Curve"):
+                    fpr, tpr, thresholds = roc_curve(y_test, model.predict_proba(X_test)[:, 1])
+                    roc_auc = auc(fpr, tpr)
+                    plt.figure(figsize=(8, 6))
+                    plt.plot(fpr, tpr, color="blue", lw=2, label="ROC curve (area = %0.2f)" % roc_auc)
+                    plt.plot([0, 1], [0, 1], color="gray", lw=2, linestyle="--")
+                    plt.xlabel("False Positive Rate")
+                    plt.ylabel("True Positive Rate")
+                    plt.title("Receiver Operating Characteristic (ROC) Curve")
+                    plt.legend(loc="lower right")
+                    st.pyplot(plt)
+
+                # Precision-Recall Curve
+                if st.checkbox("Show Precision-Recall Curve"):
+                    precision, recall, thresholds = precision_recall_curve(y_test, model.predict_proba(X_test)[:, 1])
+                    plt.figure(figsize=(8, 6))
+                    plt.plot(recall, precision, color="blue", lw=2)
+                    plt.xlabel("Recall")
+                    plt.ylabel("Precision")
+                    plt.title("Precision-Recall Curve")
+                    st.pyplot(plt)
+
+                # SHAP feature importance
+                if st.button("SHAP Feature Importance"):
+                    explainer = shap.TreeExplainer(model)
+                    shap_values = explainer.shap_values(X_test)
+                    shap.summary_plot(shap_values, X_test)
+                    st.pyplot(plt)
+
             except (KeyError, ValueError) as e:
                 st.error(f"Error: {e}")
             except Exception as e:
                 st.error(f"An unexpected error occurred: {e}")
 
-    except Exception as e:
-        st.error(f"An error occurred while loading the dataset: {e}")
+        # --- Model Comparison ---
+        if st.button("Compare Models"):
+            models = [LogisticRegression(), DecisionTreeClassifier(), RandomForestClassifier()]
+            results = {}
 
+            for model in models:
+                model_name = model.__class__.__name__
+                model.fit(X_train, y_train)
+                y_pred = model.predict(X_test)
 
-#moretocome
+                # Store metrics
+                accuracy = accuracy_score(y_test, y_pred)
+                results[model_name] = accuracy
+
+            # Show comparison results
+            st.write("Model Comparison Results:")
+            comparison_df = pd.DataFrame(results.items(), columns=["Model", "Accuracy"])
+            st.write(comparison_df)
+
+        # --- Hyperparameter Optimization with GridSearchCV ---
+        if st.button("Optimize Hyperparameters"):
+            param_grid = {
+                "Logistic Regression": {"C": [0.01, 0.1, 1, 10]},
+                "Decision Tree": {"max_depth": [3, 5, 10, None]},
+                "Random Forest": {"n_estimators": [50, 100, 200], "max_depth":
