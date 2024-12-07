@@ -109,6 +109,10 @@ Your default browser will open the app interface.
    - Click "Train Model" to preprocess your data and train the selected model.  
    - View performance metrics and visualizations instantly.  
 
+**6. Download the Trained Model (New Feature!):**
+
+After training, you can download the trained model for later use or deployment. This allows you to utilize your trained model outside of this web application.  Click the "Download Model" button to save the model as a [file format, e.g., .pkl, .joblib] file.
+
 ---
 
 ## 🌐 **Try the Interactive Dashboard**  
