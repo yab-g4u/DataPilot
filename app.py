@@ -14,7 +14,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 import shap
 import joblib
-import io
 
 # Dark Mode Styling
 st.markdown(
@@ -137,17 +136,6 @@ if uploaded_file is not None:
                 "confusion_matrix": confusion_matrix(y_test, y_pred),
                 "classification_report": classification_report(y_test, y_pred, output_dict=True),
             }
-
-            # Save trained model
-            model_filename = f"{model_name}_model.pkl"
-            joblib.dump(model, model_filename)
-            with open(model_filename, "rb") as model_file:
-                st.download_button(
-                    label=f"Download {model_name} Model",
-                    data=model_file,
-                    file_name=model_filename,
-                    mime="application/octet-stream"
-                )
 
         # Model Comparison Dashboard
         st.subheader("Model Comparison Dashboard")
