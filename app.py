@@ -7,13 +7,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.inspection import permutation_importance
 import joblib
+import shap
+import io
 
 # Dark Mode Styling (Custom CSS)
 st.markdown(
@@ -48,10 +51,6 @@ st.markdown(
             background-color: #444;
             color: white;
         }
-        .stCheckbox>div>div>input {
-            background-color: #444;
-            color: white;
-        }
     </style>
     """,
     unsafe_allow_html=True
@@ -80,23 +79,30 @@ if uploaded_file is not None:
     handle_missing = st.sidebar.checkbox("Handle Missing Data")
 
     # Model selection
-    model_choice = st.sidebar.selectbox("Select Model", ["Random Forest", "Logistic Regression", "Decision Tree"])
+    st.sidebar.header("Model Selection")
+    models_selected = st.sidebar.multiselect(
+        "Select Models to Compare",
+        ["Random Forest", "Logistic Regression", "Decision Tree"]
+    )
 
-    # Hyperparameter optimization for each model
-    hyperparameter_optimization = False
-    if model_choice == "Logistic Regression":
-        regularization_strength = st.sidebar.slider("Regularization Strength", 0.01, 1.0, 0.1)
-        hyperparameter_optimization = True
-    elif model_choice == "Decision Tree":
-        max_depth = st.sidebar.slider("Maximum Depth", 1, 20, 5)
-        hyperparameter_optimization = True
-    elif model_choice == "Random Forest":
-        n_estimators = st.sidebar.slider("Number of Estimators", 10, 200, 100)
-        max_depth = st.sidebar.slider("Maximum Depth", 1, 20, 5)
-        hyperparameter_optimization = True
+    # Hyperparameter optimization for selected models
+    hyperparameters = {}
+    if "Random Forest" in models_selected:
+        hyperparameters["Random Forest"] = {
+            "n_estimators": st.sidebar.slider("RF: Number of Estimators", 10, 200, 100),
+            "max_depth": st.sidebar.slider("RF: Maximum Depth", 1, 20, 5)
+        }
+    if "Logistic Regression" in models_selected:
+        hyperparameters["Logistic Regression"] = {
+            "regularization_strength": st.sidebar.slider("LR: Regularization Strength", 0.01, 1.0, 0.1)
+        }
+    if "Decision Tree" in models_selected:
+        hyperparameters["Decision Tree"] = {
+            "max_depth": st.sidebar.slider("DT: Maximum Depth", 1, 20, 5)
+        }
 
-    # Button to trigger model training
-    if st.button("Train Model"):
+    # Button to trigger model training and comparison
+    if st.button("Train and Compare Models"):
         # Split data into features (X) and target (y)
         X = data.drop(target_column, axis=1)
         y = data[target_column]
@@ -118,70 +124,76 @@ if uploaded_file is not None:
 
         X_processed = preprocessor.fit_transform(X)
 
-        # Choose model based on user selection
-        if model_choice == "Random Forest":
-            model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
-        elif model_choice == "Logistic Regression":
-            model = LogisticRegression(C=regularization_strength)
-        elif model_choice == "Decision Tree":
-            model = DecisionTreeClassifier(max_depth=max_depth)
-
         # Train-test split
         X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
 
-        # Train the model
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
+        # Train and evaluate each model
+        model_results = {}
+        for model_name in models_selected:
+            if model_name == "Random Forest":
+                model = RandomForestClassifier(
+                    n_estimators=hyperparameters["Random Forest"]["n_estimators"],
+                    max_depth=hyperparameters["Random Forest"]["max_depth"]
+                )
+            elif model_name == "Logistic Regression":
+                model = LogisticRegression(
+                    C=hyperparameters["Logistic Regression"]["regularization_strength"]
+                )
+            elif model_name == "Decision Tree":
+                model = DecisionTreeClassifier(
+                    max_depth=hyperparameters["Decision Tree"]["max_depth"]
+                )
 
-        # Display evaluation metrics
-        st.write("Confusion Matrix:")
-        cm = confusion_matrix(y_test, y_pred)
-        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
-        plt.xlabel("Predicted")
-        plt.ylabel("Actual")
-        st.pyplot(plt)
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
 
-        st.write("Classification Report:")
-        st.write(classification_report(y_test, y_pred))
-        st.write(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+            # Collect metrics
+            model_results[model_name] = {
+                "model": model,
+                "accuracy": accuracy_score(y_test, y_pred),
+                "confusion_matrix": confusion_matrix(y_test, y_pred),
+                "classification_report": classification_report(y_test, y_pred, output_dict=True)
+            }
 
-        # Save the trained model
-        model_filename = "trained_model.pkl"
-        joblib.dump(model, model_filename)
+        # Display results
+        st.write("### Model Comparison")
+        comparison_df = pd.DataFrame({
+            model_name: {
+                "Accuracy": result["accuracy"],
+                "Precision": np.mean([
+                    result["classification_report"][str(label)]["precision"]
+                    for label in np.unique(y_test)
+                ]),
+                "Recall": np.mean([
+                    result["classification_report"][str(label)]["recall"]
+                    for label in np.unique(y_test)
+                ]),
+                "F1-Score": np.mean([
+                    result["classification_report"][str(label)]["f1-score"]
+                    for label in np.unique(y_test)
+                ])
+            }
+            for model_name, result in model_results.items()
+        })
+        st.dataframe(comparison_df)
 
-        # Provide a download link for the trained model
-        with open(model_filename, "rb") as model_file:
-            st.download_button(
-                label="Download Trained Model",
-                data=model_file,
-                file_name=model_filename,
-                mime="application/octet-stream"
-            )
+        # SHAP explanations for Random Forest (if selected)
+        if "Random Forest" in models_selected:
+            st.write("### SHAP Explanations for Random Forest")
+            explainer = shap.TreeExplainer(model_results["Random Forest"]["model"])
+            shap_values = explainer.shap_values(X_test)
+            shap.summary_plot(shap_values, X_test, plot_type="bar")
+            st.pyplot(bbox_inches="tight")
 
-        # Visualizations (Histograms, Boxplots, and Correlation Matrix)
-        st.subheader("Data Visualizations")
-
-        # Histogram for numerical features
-        st.write("### Histograms of Numerical Features")
-        for col in num_cols:
-            st.write(f"#### {col}")
-            fig, ax = plt.subplots(figsize=(8, 6))
-            sns.histplot(data[col], kde=True, ax=ax)
-            st.pyplot(fig)
-
-        # Boxplot to detect outliers
-        st.write("### Boxplots to Identify Outliers")
-        for col in num_cols:
-            st.write(f"#### {col}")
-            fig, ax = plt.subplots(figsize=(8, 6))
-            sns.boxplot(x=data[col], ax=ax)
-            st.pyplot(fig)
-
-        # Correlation matrix
-        st.write("### Correlation Matrix")
-        corr_matrix = data[num_cols].corr()
-        fig, ax = plt.subplots(figsize=(10, 8))
-        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
-        st.pyplot(fig)
-
-#more_to_come
+        # Allow users to download models
+        st.write("### Download Trained Models")
+        for model_name, result in model_results.items():
+            model_filename = f"{model_name}_model.pkl"
+            joblib.dump(result["model"], model_filename)
+            with open(model_filename, "rb") as model_file:
+                st.download_button(
+                    label=f"Download {model_name} Model",
+                    data=model_file,
+                    file_name=model_filename,
+                    mime="application/octet-stream"
+                )
