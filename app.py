@@ -183,3 +183,5 @@ if uploaded_file is not None:
         fig, ax = plt.subplots(figsize=(10, 8))
         sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="coolwarm", ax=ax)
         st.pyplot(fig)
+
+#more
