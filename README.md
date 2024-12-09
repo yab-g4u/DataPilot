@@ -50,7 +50,7 @@ Uncover insights with interactive and dynamic plots:
 
 ### **🌟 User-Centric Design**  
 - Intuitive interface with clear guidance at every step.  
-- No coding experience required!  
+- No coding experience required!!
 
 ---
 
