@@ -1,4 +1,4 @@
-Here’s your updated `README.md` written with a polished markdown style for professional presentation:  
+Here’s the updated `README.md` with the live link included:  
 
 # **DataPilot - Interactive Machine Learning Platform**  
 Your ultimate solution for effortless data exploration, visualization, and machine learning model experimentation!  
@@ -85,12 +85,18 @@ cd ml-dashboard
 pip install -r requirements.txt  
 ```  
 
-### **Step 3: Run the App**  
+### **Step 3: Run the App Locally**  
 Launch the dashboard:  
 ```bash  
 streamlit run app.py  
 ```  
 Your default browser will open the app interface.  
+
+---
+
+## 🌐 **Try DataPilot Live**  
+Experience **DataPilot** directly in your browser:  
+👉 [Run DataPilot Live!](https://ml-dashboard-egwwhfpax5cvufphgsahgd.streamlit.app/)  
 
 ---
 
@@ -134,12 +140,6 @@ Your default browser will open the app interface.
 
 ---
 
-## 🌐 **Try the Interactive Dashboard**  
-Experience **DataPilot** live:  [https://ml-dashboard-egwwhfpax5cvufphgsahgd.streamlit.app/]
-Launch the Dashboard Now!  
-
----
-
 ## 🤝 **Contribute to DataPilot**  
 We love collaboration! Whether you want to fix a bug or propose a new feature, here's how to get started:  
 1. Fork the repository.  
@@ -150,6 +150,3 @@ We love collaboration! Whether you want to fix a bug or propose a new feature, h
 
 ## 👤 **About the Creator**  
 Made with ❤️ by **Yeabsira Sisay**.  
-```  
-
-This `README.md` format provides clarity and professionalism, making it appealing to potential users and contributors. Let me know if any additional refinements are needed!
