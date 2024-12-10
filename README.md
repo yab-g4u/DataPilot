@@ -73,8 +73,7 @@ Fine-tune your models with adjustable parameters:
 ## 🎯 **Getting Started**  
 
 ### **Step 1: Clone the Repository**  
-```bash  
-(https://github.com/yab-g4u/ml-dashboard.git)```  
+git clone https://github.com/yab-g4u/ml-dashboard.git  
 
 ### **Step 2: Install Dependencies**  
 Navigate to the project folder and install the required packages:  
