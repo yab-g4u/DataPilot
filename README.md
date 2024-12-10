@@ -1,3 +1,4 @@
+Here’s your updated `README.md` written with a polished markdown style for professional presentation:  
 
 # **DataPilot - Interactive Machine Learning Platform**  
 Your ultimate solution for effortless data exploration, visualization, and machine learning model experimentation!  
@@ -73,7 +74,9 @@ Fine-tune your models with adjustable parameters:
 ## 🎯 **Getting Started**  
 
 ### **Step 1: Clone the Repository**  
+```bash  
 git clone https://github.com/yab-g4u/ml-dashboard.git  
+```  
 
 ### **Step 2: Install Dependencies**  
 Navigate to the project folder and install the required packages:  
@@ -132,7 +135,7 @@ Your default browser will open the app interface.
 ---
 
 ## 🌐 **Try the Interactive Dashboard**  
-Experience **DataPilot** live:  
+Experience **DataPilot** live:  [https://ml-dashboard-egwwhfpax5cvufphgsahgd.streamlit.app/]
 Launch the Dashboard Now!  
 
 ---
@@ -147,3 +150,6 @@ We love collaboration! Whether you want to fix a bug or propose a new feature, h
 
 ## 👤 **About the Creator**  
 Made with ❤️ by **Yeabsira Sisay**.  
+```  
+
+This `README.md` format provides clarity and professionalism, making it appealing to potential users and contributors. Let me know if any additional refinements are needed!
