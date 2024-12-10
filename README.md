@@ -1,4 +1,3 @@
-Here’s your updated `README.md` written with a polished markdown style for professional presentation:  
 
 # **DataPilot - Interactive Machine Learning Platform**  
 Your ultimate solution for effortless data exploration, visualization, and machine learning model experimentation!  
