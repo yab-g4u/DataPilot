@@ -1,5 +1,5 @@
 
-# **DataPilot - Interactive Machine Learning Platform**  
+# **DataPilot - Interactive ML Platform**  
 Your ultimate solution for effortless data exploration, visualization, and machine learning model experimentation!  
 
 ---
