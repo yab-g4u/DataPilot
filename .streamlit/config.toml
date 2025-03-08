@@ -3,5 +3,5 @@
 primaryColor = "#4CAF50"  # Example: Green
 backgroundColor = "#F5F5F5"  # Light gray background
 secondaryBackgroundColor = "#FFFFFF"  # White cards
-textColor = "#333333"  # Dark text
+textColor = "#33333"  # Dark text
 font = "sans serif"  # Professional font
