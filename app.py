@@ -211,6 +211,6 @@ if uploaded_file is not None:
                     except Exception as e:
                         st.error(f"Prediction failed: {e}")
     except Exception as e:
-        st.error(f"Failed to load the dataset: {e}")
+        st.error(f"Faile to load the dataset: {e}")
 else:
     st.info("Please upload a valid CSV file.")
