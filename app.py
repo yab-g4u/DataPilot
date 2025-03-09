@@ -135,7 +135,7 @@ if uploaded_file is not None:
 
                 X_processed = preprocessor.fit_transform(X)
 
-                # Train-test split
+                # Train-test spli
                 X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
 
                 model_results = {}
