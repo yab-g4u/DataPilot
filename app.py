@@ -53,7 +53,8 @@ st.markdown('<div class="header">DataPilot</div>', unsafe_allow_html=True)
 st.markdown('<div class="subheader">Your Interactive Machine Learning Dashboard</div>', unsafe_allow_html=True)
 
 # Sidebar for uploading dataset
-st.sidebar.title("Upload Dataset")
+with st.sidebar:
+    st.title("Upload Dataset")
 uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
@@ -75,7 +76,6 @@ if uploaded_file is not None:
                     st.pyplot(bbox_inches="tight")
                 else:
                     st.write("Not enough numerical features for pairplot.")
-
                 st.write("### Correlation Heatmap")
                 if len(numeric_cols) > 1:
                     corr = data[numeric_cols].corr()
@@ -119,7 +119,6 @@ if uploaded_file is not None:
                 # Data Preprocessing
                 num_cols = X.select_dtypes(include=np.number).columns
                 cat_cols = X.select_dtypes(exclude=np.number).columns
-
                 preprocessor = ColumnTransformer(
                     transformers=[
                         ("num", Pipeline([
@@ -135,7 +134,7 @@ if uploaded_file is not None:
 
                 X_processed = preprocessor.fit_transform(X)
 
-                # Train-test spli
+                # Train-test split
                 X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
 
                 model_results = {}
@@ -188,7 +187,6 @@ if uploaded_file is not None:
                 try:
                     feature_names = preprocessor.get_feature_names_out()
                     X_test_df = pd.DataFrame(X_test, columns=feature_names)
-
                     for model_name, result in model_results.items():
                         st.write(f"SHAP Explanation for {model_name}")
                         explainer = shap.Explainer(result["model"], X_test_df)
@@ -206,11 +204,11 @@ if uploaded_file is not None:
                     try:
                         input_df = pd.DataFrame([sample_input])
                         input_transformed = preprocessor.transform(input_df)
-                        predictions = {model_name: model.predict(input_transformed)[0] for model_name, model in models_selected.items()}
+                        predictions = {model_name: model.predict(input_transformed)[0] for model_name, model in model_results.items()}
                         st.write(predictions)
                     except Exception as e:
                         st.error(f"Prediction failed: {e}")
     except Exception as e:
-        st.error(f"Faile to load the dataset: {e}")
+        st.error(f"Failed to load the dataset: {e}")
 else:
     st.info("Please upload a valid CSV file.")
