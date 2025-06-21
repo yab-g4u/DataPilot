@@ -1,135 +1,170 @@
-🏦 DataPilot for Finance
-Empowering Microfinance & Fintech with Explainable AI
+# 🏦 DataPilot for Finance
 
-DataPilot for Finance is a web-based ML-powered dashboard designed to help financial institutions like microfinance orgs and fintech startups make auditable, explainable, and data-driven loan decisions.
+> **Empowering Microfinance & Fintech with Explainable AI**
 
-Built with Streamlit and scikit-learn, it enables teams to train, evaluate, and deploy models for Loan Default Prediction, with built-in regulatory features like SHAP explanations and audit-ready PDF reports.
+**DataPilot for Finance** is a web-based interactive machine learning dashboard tailored for financial institutions like microfinance organizations and fintech startups. It helps teams build auditable, explainable, and data-driven solutions for **Loan Default Prediction**, with built-in SHAP-based interpretability and compliance-friendly reporting.
 
-🌟 Key Features
-📂 Dataset Upload
-Upload loan, credit, or risk datasets (CSV)
+---
 
-Automatic validation & preview
+## 🌟 Key Features
 
-📊 Use-Case Templates
-Currently Supported: Loan Default Prediction
+### 📂 Dataset Upload
+- Upload financial datasets in CSV format
+- Automatic preview and validation
 
-Future: Fraud Detection, Credit Scoring, Customer Churn
+### 🧭 Use-Case Templates
+- ✅ `Loan Default Prediction` (currently supported)
+- 🚧 `Fraud Detection`, `Credit Scoring` (coming soon)
 
-⚙️ Auto Preprocessing
-Handles missing values, scaling, and encoding
+### ⚙️ Automated Preprocessing
+- Handles missing values
+- One-hot encoding for categorical data
+- Scaling for numerical features
 
-Supports numerical & categorical columns
+### 🧠 Model Training
+- Choose from:
+  - Logistic Regression
+  - Random Forest Classifier
+- Config-free, one-click training
 
-No manual configuration required
+### 📈 Model Evaluation
+- Accuracy Score
+- Confusion Matrix
+- Classification Report
 
-🧠 Train ML Models
-Choose between:
+### 🔍 Model Explainability
+- Global SHAP Summary Plot
+- Local SHAP “Explain This Row” view
+- Improves transparency and trust in model decisions
 
-Random Forest
+### 📄 PDF Audit Report
+- Generate a professional PDF report for:
+  - Model metadata
+  - Accuracy & confusion matrix
+  - Compliance purposes
 
-Logistic Regression
+### 💾 Export Trained Models
+- Download trained model as `.pkl`
+- Deploy to production via FastAPI
 
-One-click training and validation
+### 🌐 Language Support (Planned)
+- English (default)
+- Amharic 🇪🇹 *(coming soon)*
 
-📈 Model Evaluation
-Accuracy, Confusion Matrix, Classification Report
+### 🔐 Role-Based Access (Beta)
+- **Data Analyst View**: Train, test, visualize
+- **Compliance Officer View**: Generate audit reports
 
-Interactive visual insights
+---
 
-🔍 Explainability (XAI)
-Global SHAP Summary Plot
+## 🚀 Getting Started
 
-Local SHAP Row-wise Explanation ("Explain this row")
+### 1. Clone the Repository
 
-Enhances transparency & trust in model decisions
-
-📄 Audit Report Generation
-PDF report with:
-
-Model metadata
-
-Accuracy & confusion matrix
-
-Summary for compliance officers
-
-💾 Export & Integration
-Download trained model as .pkl
-
-Deployable via FastAPI API for production inference
-
-🌐 Language Support (Planned)
-English ✅
-
-Amharic 🇪🇹 (Coming Soon)
-
-🔐 Role-Based Access (Beta)
-Data Analyst View: Train, test, visualize
-
-Compliance Officer View: Generate audit reports
-
-🧪 Getting Started
-1️⃣ Clone the Repository
-bash
-Copy
-Edit
-git clone https://github.com/yourusername/datapilot-finance.git
+```bash
+git clone https://github.com/yab-g4u/datapilot-finance.git
 cd datapilot-finance
-2️⃣ Install Dependencies
-bash
-Copy
-Edit
+````
+
+### 2. Install Dependencies
+
+```bash
 pip install -r requirements.txt
-3️⃣ Run Locally
-bash
-Copy
-Edit
+```
+
+### 3. Launch the App
+
+```bash
 streamlit run app.py
-Access at http://localhost:8501
+```
 
-🎯 Target Users
-Microfinance Institutions (e.g., Metemamen, Omo MFI)
+Open your browser at `http://localhost:8501`
 
-Fintech companies (e.g., ArifPay, EthioPay)
+---
 
-Risk analysts & compliance teams in regulated financial sectors
+## 🎯 Target Audience
 
-🛠 Tech Stack
-Layer	Tool
-UI	Streamlit
-Backend	Python
-ML	scikit-learn
-XAI	SHAP
-Export	Joblib, FPDF
-API Deployment	FastAPI (optional)
-DB (planned)	SQLite / Firebase
-Hosting	Streamlit Cloud / Railway
+* Microfinance Institutions (e.g., Metemamen MFI, Omo MFI)
+* Fintechs (e.g., ArifPay, EthioPay)
+* Credit Analysts, Risk Officers, Compliance Teams
 
-📌 Example Use Case: Loan Default Prediction
-Input:
-Loan dataset with borrower attributes
+---
 
-Output:
-Probability of default
+## 🧰 Tech Stack
 
-SHAP values for each prediction
+| Layer        | Tool                      |
+| ------------ | ------------------------- |
+| Frontend     | Streamlit                 |
+| Backend      | Python                    |
+| ML           | Scikit-learn              |
+| XAI          | SHAP                      |
+| Export       | Joblib, FPDF              |
+| Deployment   | FastAPI                   |
+| Hosting      | Streamlit Cloud / Railway |
+| DB (Planned) | SQLite / Firebase         |
 
-Compliance-ready report
+---
 
-📤 FastAPI Integration (Optional)
-You can deploy your trained .pkl model via a REST API:
+## 📤 Optional API Deployment
 
-bash
-Copy
-Edit
+You can expose your trained model using FastAPI.
+
+Example:
+
+```bash
 uvicorn api:app --reload
-Send POST requests to /predict with borrower features.
+```
 
-🤝 Contributing
-We welcome feedback and contributions—especially from:
+Send `POST` requests to `/predict` with borrower data in JSON format.
 
-Financial domain experts
+---
 
-Regulators and compliance analysts
+## 📌 Sample Use Case
 
-Open-source ML enthusiasts
+### Input:
+
+CSV dataset with borrower history & loan details
+
+### Output:
+
+* Default prediction (yes/no)
+* Explanation of key contributing factors (via SHAP)
+* Downloadable audit PDF
+
+---
+
+## 📈 Roadmap
+
+* [ ] Add full Amharic UI toggle
+* [ ] Add support for additional use cases: Credit Scoring, Fraud Detection
+* [ ] Add login and user-role authentication
+* [ ] One-click deployment to Railway/Render
+* [ ] Integration with Firebase for secure storage
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions and feedback from:
+
+* Financial domain experts
+* Regulators and compliance officers
+* Open-source contributors
+
+Feel free to open an issue or submit a pull request.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See [`LICENSE`](LICENSE) for more information.
+
+---
+
+## 🙌 Acknowledgments
+
+Inspired by the urgent need for local, explainable, and auditable ML tools in Ethiopia's financial ecosystem.
+
+```
+
+
