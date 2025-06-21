@@ -62,8 +62,8 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone [https://github.com/yab-g4u/datapilot-finance.git](https://github.com/yab-g4u/ml-dashboard.git)
-cd datapilot-finance
+git clone https://github.com/yab-g4u/ml-dashboard.git
+cd ml-dashboard
 ````
 
 ### 2. Install Dependencies
