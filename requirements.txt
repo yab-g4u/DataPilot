@@ -1,7 +1,10 @@
-streamlit
+fastapi
+uvicorn[standard]
 pandas
+numpy
 scikit-learn
 matplotlib
 seaborn
-numpy
 shap
+streamlit
+joblib
