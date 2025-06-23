@@ -13,7 +13,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-from fpdf import FPDF  # You can replace with ReportLab/WeasyPrint if needed
+from fpdf import FPDF  
+
 
 st.set_page_config(page_title="DataPilot for Finance", layout="wide", page_icon="💰")
 
