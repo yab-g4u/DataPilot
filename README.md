@@ -13,7 +13,7 @@
 - Automatic preview and validation
 
 ### 🧭 Use-Case Templates
-- ✅ `Loan Default Prediction` (currently supported)
+- ✅ `Loan Default Predction` (currently supported)
 - 🚧 `Fraud Detection`, `Credit Scoring` (coming soon)
 
 ### ⚙️ Automated Preprocessing
