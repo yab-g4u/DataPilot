@@ -136,7 +136,7 @@ CSV dataset with borrower history & loan details
 ## 📈 Roadmap
 
 * [ ] Add full Amharic UI toggle
-* [ ] Add support for additional use cases: Credit Scoring, Fraud Detection
+* [ ] Add suport for additional use cases: Credit Scoring, Fraud Detection
 * [ ] Add login and user-role authentication
 * [ ] One-click deployment to Railway/Render
 * [ ] Integration with Firebase for secure storage
